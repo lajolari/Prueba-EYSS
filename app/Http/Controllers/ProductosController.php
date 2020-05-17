@@ -22,12 +22,12 @@ class ProductosController extends Controller
             'categoria' => 'required',
         ]);
 
-        $producto = Productos::updateOrCreate([
-            'producto' => $request->producto,
-            'categoria_id' => $request->categoria
-        ]);
-        dd($producto);
-        return response()->json(['code'=>200, 'message'=>'Post Created successfully','data' => $post], 200);
+        $producto = new Productos();
+        $producto->producto = $request->producto;
+        $producto->categoria_id = $request->categoria;
+
+        $producto->save();
+        return response()->json(['code'=>200, 'message'=>'Producto Creado exitosamente','data' => $producto], 200);
     }
 
     /**
@@ -38,9 +38,9 @@ class ProductosController extends Controller
      */
     public function show($id)
     {
-        $post = Post::find($id);
+        $productos = Productos::where('categoria_id', $id)->get();
 
-        return response()->json($post);
+        return response()->json($productos);
     }
 
 

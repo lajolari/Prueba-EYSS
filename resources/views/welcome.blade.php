@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,22 +31,25 @@
     </div>
     <div class="row" style="clear: both;margin-top: 18px;">
         <div class="col-12">
-            <table id="categorias" class="table table-striped table-bordered">
+            <table id="categorias" class="table table-striped table-bordered text-center">
                 <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Categorias</th>
-                </tr>
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th class="text-center">Categorias</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
                 </thead>
                 <tbody>
                 @foreach($categorias as $categoria)
                     <tr id="row_{{$categoria->id}}">
                         <td>{{ $categoria->id  }}</td>
+                        <td>
+                            <div class="col-md-12" id="categoria_{{$categoria->id}}"> {{ $categoria->categoria }} </div>
+                        </td>
                         <td class="row">
-                            <div class="col-md-3"> {{ $categoria->categoria }} </div>
-                            <div class="col-md-3"> <a href="javascript:void(0)" data-id="{{ $categoria->id }}" onclick="editPost(event.target)" class="btn btn-info">Ver Productos</a> </div>
-                            <div class="col-md-3"> <a href="javascript:void(0)" data-id="{{ $categoria->id }}" onclick="editPost(event.target)" class="btn btn-info">Editar</a> </div>
-                            <div class="col-md-3"> <a href="javascript:void(0)" data-id="{{ $categoria->id }}" class="btn btn-danger" onclick="deletePost(event.target)">Eliminar</a> </div>
+                            <div class="col-md-4"> <a href="javascript:void(0)" data-id="{{ $categoria->id }}" onclick="verProductos({{  $categoria }})" class="btn btn-info">Ver Productos</a> </div>
+                            <div class="col-md-4"> <a href="javascript:void(0)" data-id="{{ $categoria->id }}" class="btn btn-danger" onclick="eliminarCategoria({{ $categoria }})">Eliminar</a> </div>
+                            <div class="col-md-4"> <a href="javascript:void(0)" data-id="{{ $categoria->id }}" onclick="editCategoria({{ $categoria }})" class="btn btn-info">Editar</a> </div>
                         </td>
                     </tr>
                 @endforeach
@@ -54,79 +58,68 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="categorias-modal" aria-hidden="true">
+
+<div class="modal fade" id="main-modal" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title"></h4>
-            </div>
-            <div class="modal-body">
-                <form name="userForm" class="form-horizontal">
-                    <input type="hidden" name="catgoria_id" id="catgoria_id">
-                    <div class="form-group">
-                        <label for="name" class="col-sm-2">Producto</label>
-                        <div class="col-sm-12">
-                            <input type="text" class="form-control" id="title" name="title" placeholder="Ingresar Nombre del Producto">
-                            <span id="productoError" class="alert-message"></span>
-                        </div>
-                    </div>
+            <div id="modal-header" class="modal-header">
 
-                    <div class="form-group">
-                        <label class="col-sm-2">Categoria</label>
-                        <div class="col-sm-12">
-                            <select name="categoria" id="categoria">
-                                @foreach($categorias as $categoria)
-                                    <option value=" {{ $categoria->id }} "> {{ $categoria->categoria }} </option>
-                                @endforeach
-                            </select>
-                        </textarea>
-                            <span id="categoriaError" class="alert-message"></span>
-                        </div>
-                    </div>
-                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="createProduct()">Guardar</button>
+            <div id="modal-body" class="modal-body">
+
+            </div>
+            <div id="modal-footer" class="modal-footer">
+
             </div>
         </div>
     </div>
 </div>
 </body>
 <script>
-    $('#categorias').DataTable();
-
-    function addProducto() {
-        $('#categorias-modal').modal('show');
+    function cerrarModal(){
+        $('#main-modal').modal('hide');
     }
 
-    function editPost(event) {
-        var id  = $(event).data("id");
-        let _url = `/editar_producto/${id}`;
-        $('#titleError').text('');
-        $('#descriptionError').text('');
+    $("#main-modal").on("hidden.bs.modal", function(){
+        $("#modal-header").empty();
+        $("#modal-body").empty();
+        $("#modal-footer").empty();
+    });
 
-        $.ajax({
-            url: _url,
-            type: "GET",
-            success: function(response) {
-                if(response) {
-                    $("#catgoria_id").val(response.id);
-                    $("#title").val(response.title);
-                    $("#producto").val(response.description);
-                    $('#categorias-modal').modal('show');
-                }
-            }
-        });
+    function addProducto() {
+        $('#main-modal').modal('show');
+        document.getElementById("modal-header").innerHTML += '<h4 class="modal-title">Agregar Producto</h4>';
+        document.getElementById("modal-body").innerHTML += '<form name="userForm" class="form-horizontal"> \
+                        <input type="hidden" name="catgoria_id" id="catgoria_id"> \
+                        <div class="form-group"> \
+                            <label for="name" class="col-sm-2">Producto</label> \
+                            <div class="col-sm-12"> \
+                                <input type="text" class="form-control" id="title" name="title" placeholder="Ingresar Nombre del Producto"> \
+                                <span id="productoError" class="alert-message"></span> \
+                            </div> \
+                        </div> \
+                        <div class="form-group"> \
+                            <label class="col-sm-2">Categoria</label> \
+                            <div class="col-sm-12"> \
+                                <select name="categoria" id="categoria"> \
+                                @foreach($categorias as $categoria) \
+                                    <option value=" {{ $categoria->id }} "> {{ $categoria->categoria }} </option> \
+                                @endforeach \
+                                </select> \
+                                <span id="categoriaError" class="alert-message"></span> \
+                            </div> \
+                        </div> \
+                      </form>';
+        document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-primary' onclick='createProduct()'>Guardar</button>";
+        document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-danger' onclick='cerrarModal()'>Cerrar</button>";
     }
 
     function createProduct() {
         var producto = $('#title').val();
         var e = document.getElementById("categoria");
         var categoria = e.options[e.selectedIndex].value;
-
         let _url     = `/producto_nuevo`;
         let _token   = $('meta[name="csrf-token"]').attr('content');
-
         $.ajax({
             url: _url,
             type: "POST",
@@ -137,29 +130,112 @@
             },
             success: function(response) {
                 if(response.code == 200) {
-                    if(id != ""){
-                        $("#row_"+id+" td:nth-child(2)").html(response.data.title);
-                        $("#row_"+id+" td:nth-child(3)").html(response.data.description);
-                    } else {
-                        $('table tbody').prepend('<tr id="row_'+response.data.id+'"><td>'+response.data.id+'</td><td>'+response.data.title+'</td><td>'+response.data.description+'</td><td><a href="javascript:void(0)" data-id="'+response.data.id+'" onclick="editPost(event.target)" class="btn btn-info">Edit</a></td><td><a href="javascript:void(0)" data-id="'+response.data.id+'" class="btn btn-danger" onclick="deletePost(event.target)">Delete</a></td></tr>');
-                    }
-                    $('#title').val('');
-
-                    $('#categorias-modal').modal('hide');
+                    $("#modal-body").empty();
+                    $("#modal-footer").empty();
+                    document.getElementById("modal-body").innerHTML += "<h1 style='color:green;'>"+ response.message +"</h1>";
+                    document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-danger' onclick='cerrarModal()'>Cerrar</button>";
                 }
             },
             error: function(response) {
                 $('#productoError').text(response.responseJSON.errors.title);
-                $('#categoriaError').text(response.responseJSON.errors.description);
+                $('#categoriaError').text(response.responseJSON.errors.producto);
             }
         });
     }
 
-    function deletePost(event) {
-        var id  = $(event).data("id");
-        let _url = `/posts/${id}`;
-        let _token   = $('meta[name="csrf-token"]').attr('content');
+    function editCategoria(data){
+        $('#main-modal').modal('show');
+        document.getElementById("modal-header").innerHTML += '<h4 class="modal-title">Editar '+ data.categoria +'</h4>';
+        document.getElementById("modal-body").innerHTML += '<form name="userForm" class="form-horizontal"> \
+                        <input type="hidden" name="catgoria_id" id="catgoria_id"> \
+                        <div class="form-group"> \
+                            <label for="name" class="col-sm-2">Categoria</label> \
+                            <div class="col-sm-12"> \
+                                <input type="text" class="form-control" id="categoria" name="title" placeholder="Ingresar Nombre de la Categoria"> \
+                                <span id="productoError" class="alert-message"></span> \
+                            </div> \
+                        </div> \
+                      </form>';
+        document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-primary' onclick='editarCategoria("+data.id+")'>Guardar</button>";
+        document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-danger' onclick='cerrarModal()'>Cerrar</button>";
+    }
 
+    function editarCategoria(data) {
+        let _url = `/editar_categoria/${data}`;
+        var editado = $('#categoria').val();
+        let _token   = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: _url,
+            type: "POST",
+            data: {
+                id: data,
+                edited: editado,
+                _token: _token
+            },
+            success: function(response) {
+                if(response.code == 200) {
+                    $("#modal-body").empty();
+                    $("#modal-footer").empty();
+                    document.getElementById("modal-body").innerHTML += "<h1 style='color:green;'>"+ response.message +"</h1>";
+                    document.getElementById("categoria_"+response.data.id).innerHTML = response.data.categoria;
+                    document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-danger' onclick='cerrarModal()'>Cerrar</button>";
+                }
+            },
+            error: function(response) {
+                $('#productoError').text(response.responseJSON.errors.title);
+                $('#categoriaError').text(response.responseJSON.errors.producto);
+            }
+        });
+    }
+
+    function verProductos(data) {
+        document.getElementById("modal-header").innerHTML += '<h4 class="modal-title">Productos de '+ data.categoria +'</h4>';
+        document.getElementById("modal-body").innerHTML += '<table id="productos_table" class="table table-sm table-bordered"> \
+                                                                <thead> \
+                                                                    <tr> \
+                                                                        <th>ID</th> \
+                                                                        <th>Nombre del Producto</th> \
+                                                                    </tr> \
+                                                                </thead> \
+                                                                <tbody id="productos_body"> \
+                                                                </tbody>\
+                                                            </table>';
+        let _url = `/productos/${data.id}`;
+
+        $('#titleError').text('');
+        $('#descriptionError').text('');
+        $.ajax({
+            url: _url,
+            type: "GET",
+            success: function(response) {
+                if(response) {
+                    const div = document.createElement('div');
+                    div.id = 'lista_productos';
+                    document.getElementById('modal-body').appendChild(div);
+                    response.forEach(function (item, index) {
+                        document.getElementById("productos_body").innerHTML += '<tr> \
+                                                                    <th>'+item.id+'</th> \
+                                                                    <td>'+item.producto+'</td> \
+                                                                </tr>';
+                    })
+                    document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-danger' onclick='cerrarModal()'>Cerrar</button>";
+                    $('#main-modal').modal('show');
+                }
+            }
+        });
+    }
+
+    function eliminarCategoria(data){
+        $('#main-modal').modal('show');
+        document.getElementById("modal-header").innerHTML += '<h4 class="modal-title">Eliminacion decategoria '+ data.categoria +'</h4>';
+        document.getElementById("modal-body").innerHTML += '<h1 class="modal-title">Esta seguro de que desea eliminar la categoria <b>'+ data.categoria +'</b> ??</h1>';
+        document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-primary' onclick='deleteCategoria("+data.id+")'>Confirmar</button>";
+        document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-danger' onclick='cerrarModal()'>Cerrar</button>";
+    }
+
+    function deleteCategoria(data) {
+        let _url = `/eliminar_categoria/${data}`;
+        let _token   = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
             url: _url,
             type: 'DELETE',
@@ -167,7 +243,10 @@
                 _token: _token
             },
             success: function(response) {
-                $("#row_"+id).remove();
+                document.getElementById("modal-header").empty();
+                document.getElementById("modal-body").innerHTML += "<h1 style='color:green;'>"+ response.message +"</h1>";
+                document.getElementById("modal-footer").innerHTML += "<button type='button' class='btn btn-danger' onclick='cerrarModal()'>Cerrar</button>";
+                window.location.reload();
             }
         });
     }

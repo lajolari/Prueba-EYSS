@@ -25,10 +25,18 @@ class CategoriasController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $categoria = Categorias::find($id);
-        $datos = json_decode($request);
+        $request->validate([
+            'id' => 'required',
+            'edited'       => 'required|max:255',
+        ]);
+
+        $cat = Categorias::find($request->id);
+        $cat->categoria = $request->edited;
+
+        $cat->save();
+        return response()->json(['code'=>200, 'message'=>'Categoria modificada exitosamente','data' => $cat], 200);
         
     }
 

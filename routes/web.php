@@ -14,8 +14,8 @@
 /* Rutas de las Categorias */
 
 Route::get('/', "CategoriasController@index");
-Route::put('editar_categoria', "CategoriasController@update");
-Route::delete('eliminar_categoria', "CategoriasController@destroy");
+Route::post('editar_categoria/{id}', "CategoriasController@update");
+Route::delete('eliminar_categoria/{id}', "CategoriasController@destroy");
 
 /* Rutas de los Productos */
 

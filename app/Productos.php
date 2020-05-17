@@ -9,4 +9,5 @@ class Productos extends Model
     public $fillable = ['producto, categoria_id'];
 
     
+    
 }
